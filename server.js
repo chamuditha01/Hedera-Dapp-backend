@@ -83,7 +83,9 @@ const sendWithRetry = async (method, args = []) => {
       await sleep(3000);
     }
   }
-  throw new Error(`❌ ${method} failed after ${MAX_RETRIES} attempts`);
+
+  log(`❌ ${method} failed after ${MAX_RETRIES} attempts. Restarting app.`);
+  process.exit(1); // Force app restart via Railway
 };
 
 // --- Main Loop ---
@@ -101,8 +103,8 @@ const mainLoop = async () => {
 
       const startPrice = await fetchBTCPrice();
       if (!startPrice) {
-        log("❌ Failed to fetch BTC start price. Skipping round.");
-        continue;
+        log("❌ Failed to fetch BTC start price. Restarting app.");
+        process.exit(1);
       }
 
       log(`🚀 Starting round with BTC price: ${startPrice}`);
@@ -114,8 +116,8 @@ const mainLoop = async () => {
 
       const endPrice = await fetchBTCPrice();
       if (!endPrice) {
-        log("❌ Failed to fetch BTC end price. Skipping resolution.");
-        continue;
+        log("❌ Failed to fetch BTC end price. Restarting app.");
+        process.exit(1);
       }
 
       log(`🔚 Resolving round with BTC price: ${endPrice}`);
@@ -125,6 +127,8 @@ const mainLoop = async () => {
       log("🔄 Restarting cycle...");
     } catch (err) {
       log(`🔥 Error in main loop: ${err.message}`);
+      log("🛑 Restarting due to fatal error.");
+      process.exit(1);
     }
 
     await sleep(5000);
@@ -134,9 +138,12 @@ const mainLoop = async () => {
 // --- Error Handlers ---
 process.on('uncaughtException', (err) => {
   log(`🔥 Uncaught Exception: ${err.message}`);
+  process.exit(1); // Ensure restart
 });
+
 process.on('unhandledRejection', (reason) => {
   log(`🔥 Unhandled Rejection: ${reason}`);
+  process.exit(1); // Ensure restart
 });
 
 // --- Start ---
