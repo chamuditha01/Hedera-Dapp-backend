@@ -4,7 +4,7 @@ const axios = require("axios");
 // --- CONFIGURATION ---
 const RPC_URL = "https://testnet.hashio.io/api"; // Replace if unstable
 const PRIVATE_KEY = "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
-const CONTRACT_ADDRESS = "0xb0916Cfe4e89B830a6f726b0265A25731cDC85d1";
+const CONTRACT_ADDRESS = "0x0003f045459580fff5C9c987E747d73C86502bbb";
 const MAX_RETRIES = 3;
 
 const CONTRACT_ABI = [
