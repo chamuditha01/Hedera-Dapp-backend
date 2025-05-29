@@ -4,7 +4,7 @@ const axios = require("axios");
 // --- CONFIGURATION ---
 const RPC_URL = "https://testnet.hashio.io/api"; // Replace if unstable
 const PRIVATE_KEY = "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
-const CONTRACT_ADDRESS = "0x0003f045459580fff5C9c987E747d73C86502bbb";
+const CONTRACT_ADDRESS = "0xa3BdC63F8fF9eCD6F379B30eE2a24eE047981Eeb";
 const MAX_RETRIES = 3;
 
 const CONTRACT_ABI = [
@@ -93,11 +93,11 @@ const mainLoop = async () => {
   while (true) {
     try {
       log("⏳ Phase 1: Waiting 20s for players to join...");
-      await sleep(20000);
+      await sleep(10000);
 
       if (!(await isRPCAlive())) {
         log("🚫 RPC down. Skipping this round.");
-        await sleep(10000);
+        await sleep(5000);
         continue;
       }
 
@@ -112,7 +112,7 @@ const mainLoop = async () => {
       log("✅ Round started");
 
       log("⏳ Waiting 40s for bets...");
-      await sleep(40000);
+      await sleep(25000);
 
       const endPrice = await fetchBTCPrice();
       if (!endPrice) {
