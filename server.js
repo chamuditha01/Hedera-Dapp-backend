@@ -54,10 +54,10 @@ const isRPCAlive = async () => {
 const fetchBTCPrice = async () => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await axios.get("https://api.coingecko.com/api/v3/simple/price", {
-        params: { ids: "bitcoin", vs_currencies: "usd" }
+      const response = await axios.get("https://api.binance.com/api/v3/ticker/price", {
+        params: { symbol: "BTCUSDT" }
       });
-      const price = Math.round(response.data.bitcoin.usd);
+      const price = Math.round(parseFloat(response.data.price));
       return price;
     } catch (err) {
       log(`⚠️ BTC price fetch failed (attempt ${attempt + 1}): ${err.message}`);
@@ -66,6 +66,7 @@ const fetchBTCPrice = async () => {
   }
   return null;
 };
+
 
 const sendWithRetry = async (method, args = []) => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
