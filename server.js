@@ -143,7 +143,7 @@ const mainLoop = async () => {
       }
 
       log(`🔚 Resolving round with BTC price: ${endPrice}`);
-      await sendWithRetry("resolveRound", [endPrice]);
+      await sendWithRetry("RoundResolved", [endPrice]);
       log("🏁 Round resolved");
 
       log("🔄 Restarting cycle...");
