@@ -3,25 +3,44 @@ const axios = require("axios");
 
 // --- CONFIGURATION ---
 const RPC_URL = "https://testnet.hashio.io/api"; // Replace if unstable
-const PRIVATE_KEY = "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
-const CONTRACT_ADDRESS = "0xa3BdC63F8fF9eCD6F379B30eE2a24eE047981Eeb";
+const PRIVATE_KEY =
+  "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
+const CONTRACT_ADDRESS = "0xE465562F7113F3324cD2677EF7c919f4179d1867";
 const MAX_RETRIES = 3;
 
 const CONTRACT_ABI = [
   {
-    "inputs": [{ "internalType": "int256", "name": "price", "type": "int256" }],
-    "name": "startNewRound",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    inputs: [{ internalType: "int256", name: "price", type: "int256" }],
+    name: "startNewRound",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
-    "inputs": [{ "internalType": "int256", "name": "actualPrice", "type": "int256" }],
-    "name": "resolveRound",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "roundId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "int256",
+        name: "endPrice",
+        type: "int256",
+      },
+      {
+        indexed: false,
+        internalType: "int256",
+        name: "closestPrediction",
+        type: "int256",
+      },
+    ],
+    name: "RoundResolved",
+    type: "event",
+  },
 ];
 
 // --- SETUP ---
@@ -33,7 +52,7 @@ web3.eth.defaultAccount = account.address;
 const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
 // --- Utilities ---
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const log = (msg) => console.log(`[${new Date().toLocaleTimeString()}] ${msg}`);
 
 const recreateProvider = () => {
@@ -54,9 +73,12 @@ const isRPCAlive = async () => {
 const fetchBTCPrice = async () => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await axios.get("https://api.binance.com/api/v3/ticker/price", {
-        params: { symbol: "BTCUSDT" }
-      });
+      const response = await axios.get(
+        "https://api.binance.com/api/v3/ticker/price",
+        {
+          params: { symbol: "BTCUSDT" },
+        }
+      );
       const price = Math.round(parseFloat(response.data.price));
       return price;
     } catch (err) {
@@ -67,13 +89,12 @@ const fetchBTCPrice = async () => {
   return null;
 };
 
-
 const sendWithRetry = async (method, args = []) => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const tx = await contract.methods[method](...args).send({
         from: account.address,
-        gas: 300000
+        gas: 300000,
       });
       return tx;
     } catch (err) {
@@ -137,12 +158,12 @@ const mainLoop = async () => {
 };
 
 // --- Error Handlers ---
-process.on('uncaughtException', (err) => {
+process.on("uncaughtException", (err) => {
   log(`🔥 Uncaught Exception: ${err.message}`);
   process.exit(1); // Ensure restart
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on("unhandledRejection", (reason) => {
   log(`🔥 Unhandled Rejection: ${reason}`);
   process.exit(1); // Ensure restart
 });
