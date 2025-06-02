@@ -17,29 +17,17 @@ const CONTRACT_ABI = [
     type: "function",
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "roundId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
         internalType: "int256",
-        name: "endPrice",
-        type: "int256",
-      },
-      {
-        indexed: false,
-        internalType: "int256",
-        name: "closestPrediction",
+        name: "actualPrice",
         type: "int256",
       },
     ],
-    name: "RoundResolved",
-    type: "event",
+    name: "resolveRound",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ];
 
@@ -143,7 +131,7 @@ const mainLoop = async () => {
       }
 
       log(`🔚 Resolving round with BTC price: ${endPrice}`);
-      await sendWithRetry("RoundResolved", [endPrice]);
+      await sendWithRetry("resolveRound", [endPrice]);
       log("🏁 Round resolved");
 
       log("🔄 Restarting cycle...");
