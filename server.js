@@ -2,7 +2,7 @@ const Web3 = require("web3");
 const axios = require("axios");
 
 // --- CONFIGURATION ---
-const RPC_URL = "https://testnet.hashio.io/api"; // Replace if unstable
+const RPC_URL = "https://testnet.hashio.io/api";
 const PRIVATE_KEY =
   "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
 const CONTRACT_ADDRESS = "0x5310E12D33A1Cdcf8CE105EDC2E9A66B9D61eed0";
@@ -90,16 +90,16 @@ const fetchBTCPrice = async () => {
   return null;
 };
 
-const sendWithRetry = async (method, args = []) => {
+const startRoundWithRetry = async (price) => {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const tx = await contract.methods[method](...args).send({
+      const tx = await contract.methods.startNewRound(price).send({
         from: account.address,
-        gas: 1000000,
+        gas: 300000, // Gas limit for startNewRound
       });
       return tx;
     } catch (err) {
-      log(`⚠️ ${method} failed (attempt ${attempt + 1}): ${err.message}`);
+      log(`⚠️ startNewRound failed (attempt ${attempt + 1}): ${err.message}`);
       if (err.message.includes("CONNECTION ERROR")) {
         recreateProvider();
       }
@@ -107,8 +107,29 @@ const sendWithRetry = async (method, args = []) => {
     }
   }
 
-  log(`❌ ${method} failed after ${MAX_RETRIES} attempts. Restarting app.`);
-  process.exit(1); // Force app restart via Railway
+  log(`❌ startNewRound failed after ${MAX_RETRIES} attempts. Restarting app.`);
+  process.exit(1);
+};
+
+const resolveRoundWithRetry = async (actualPrice) => {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const tx = await contract.methods.resolveRound(actualPrice).send({
+        from: account.address,
+        gas: 1000000, // Gas limit for resolveRound
+      });
+      return tx;
+    } catch (err) {
+      log(`⚠️ resolveRound failed (attempt ${attempt + 1}): ${err.message}`);
+      if (err.message.includes("CONNECTION ERROR")) {
+        recreateProvider();
+      }
+      await sleep(3000);
+    }
+  }
+
+  log(`❌ resolveRound failed after ${MAX_RETRIES} attempts. Restarting app.`);
+  process.exit(1);
 };
 
 // --- Main Loop ---
@@ -131,7 +152,7 @@ const mainLoop = async () => {
       }
 
       log(`🚀 Starting round with BTC price: ${startPrice}`);
-      await sendWithRetry("startNewRound", [startPrice]);
+      await startRoundWithRetry(startPrice);
       log("✅ Round started");
 
       log("⏳ Waiting 40s for bets...");
@@ -149,7 +170,7 @@ const mainLoop = async () => {
         }
 
         log(`🔚 Resolving round with BTC price: ${endPrice}`);
-        await sendWithRetry("resolveRound", [endPrice]);
+        await resolveRoundWithRetry(endPrice);
         log("🏁 Round resolved");
       }
 
@@ -167,12 +188,12 @@ const mainLoop = async () => {
 // --- Error Handlers ---
 process.on("uncaughtException", (err) => {
   log(`🔥 Uncaught Exception: ${err.message}`);
-  process.exit(1); // Ensure restart
+  process.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
   log(`🔥 Unhandled Rejection: ${reason}`);
-  process.exit(1); // Ensure restart
+  process.exit(1);
 });
 
 // --- Start ---
