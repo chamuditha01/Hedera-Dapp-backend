@@ -5,7 +5,7 @@ const axios = require("axios");
 const RPC_URL = "https://testnet.hashio.io/api"; // Replace if unstable
 const PRIVATE_KEY =
   "7b5c03deb9f5056f07d3f4e934c1d051832fc62a088ba361d02af083eb07b5f7";
-const CONTRACT_ADDRESS = "0x3C6bCE73670c7eAD5f8923C2E2181A6f7dc8f19b";
+const CONTRACT_ADDRESS = "0x79474DEFc030bbE60471AC4070d810FD6E688b25";
 const MAX_RETRIES = 3;
 
 const CONTRACT_ABI = [
@@ -139,20 +139,19 @@ const mainLoop = async () => {
 
       const hasBets = await contract.methods.hasBetsInCurrentRound().call();
 
-if (!hasBets) {
-  log("🚫 No bets in current round. Skipping resolveRound.");
-} else {
-  const endPrice = await fetchBTCPrice();
-  if (!endPrice) {
-    log("❌ Failed to fetch BTC end price. Restarting app.");
-    process.exit(1);
-  }
+      if (!hasBets) {
+        log("🚫 No bets in current round. Skipping resolveRound.");
+      } else {
+        const endPrice = await fetchBTCPrice();
+        if (!endPrice) {
+          log("❌ Failed to fetch BTC end price. Restarting app.");
+          process.exit(1);
+        }
 
-  log(`🔚 Resolving round with BTC price: ${endPrice}`);
-  await sendWithRetry("resolveRound", [endPrice]);
-  log("🏁 Round resolved");
-}
-
+        log(`🔚 Resolving round with BTC price: ${endPrice}`);
+        await sendWithRetry("resolveRound", [endPrice]);
+        log("🏁 Round resolved");
+      }
 
       log("🔄 Restarting cycle...");
     } catch (err) {
