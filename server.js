@@ -95,7 +95,7 @@ const sendWithRetry = async (method, args = []) => {
     try {
       const tx = await contract.methods[method](...args).send({
         from: account.address,
-        gas: 300000,
+        gas: 500000,
       });
       return tx;
     } catch (err) {
