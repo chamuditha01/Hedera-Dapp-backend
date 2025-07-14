@@ -173,7 +173,7 @@ const mainLoop = async () => {
         await resolveRoundWithRetry(endPrice);
         log("🏁 Round resolved");
       }
-await sleep(3000);
+
       log("🔄 Restarting cycle...");
     } catch (err) {
       log(`🔥 Error in main loop: ${err.message}`);
