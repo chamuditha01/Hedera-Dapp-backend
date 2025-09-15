@@ -121,7 +121,7 @@ const resolveRoundWithRetry = async (actualPrice) => {
       return tx;
     } catch (err) {
       log(`⚠️ resolveRound failed (attempt ${attempt + 1}): ${err.message}`);
-      if (err.message.includes("CONNECTION ERROr")) {
+      if (err.message.includes("CONNECTION ERROR")) {
         recreateProvider();
       }
       await sleep(3000);
