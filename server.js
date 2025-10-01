@@ -100,7 +100,7 @@ const startRoundWithRetry = async (price) => {
       return tx;
     } catch (err) {
       log(`⚠️ startNewRound failed (attempt ${attempt + 1}): ${err.message}`);
-      if (err.message.includes("CONNECTION ERROr")) {
+      if (err.message.includes("CONNECTION ERROR")) {
         recreateProvider();
       }
       await sleep(3000);
